@@ -1,0 +1,80 @@
+#First Module: to create a sample movie recommendation matrix
+import numpy as np
+import pandas as pd
+
+def ratings_matrix(num_users, num_items):
+    data = []
+    for i in range(num_users):
+        user = [np.random.randint(2) for _ in range(num_items)]
+        data.append(user)
+    mat = pd.DataFrame(data)
+    mat.index = ["User " + str(i) for i in range(num_users)]
+    mat.columns = ["Movie " + str(i) for i in range(num_items)]
+    return mat
+
+np.random.seed(42)
+A = ratings_matrix(10, 5)
+A
+
+
+#Second Module: To compute SVD
+from scipy.linalg import svd
+def do_svd(mat, k=0, option=False):
+    U, Sigma, VT = svd(mat)
+    U = pd.DataFrame(U[:,:k])
+    VT = pd.DataFrame(VT[:k,:])
+    if option:
+        return Sigma
+    else:
+        return U, VT
+
+
+#Third Module: To get the U matrix
+U = do_svd(A, 3)[0]
+U
+
+
+
+#Fouth Module: Get the VT Matrix
+VT = do_svd(A, 3)[1]
+VT.T
+
+
+
+#Fifth Module: Get the singular values
+do_svd(A, option=True)
+array([4.3503838 , 1.95476613, 1.74753126, 0.94245216, 0.55764559])
+
+
+#Sixth Module: Display U with all 10 dimensions
+do_svd(A, 10)[0]
+
+
+
+
+
+#Seventh Module: Draw a three-dimensional plot of users’ movie preferences.
+
+%matplotlib inline
+%config InlineBackend.figure_format = 'retina'
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+plt.style.use("seaborn")
+
+def plot_data(mat, data_type, camera=None):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    if camera != None:
+        ax.view_init(elev=camera[0], azim=camera[1])
+    for index, row in mat.iterrows():
+        ax.scatter(row[0], row[1], row[2], alpha=0.8)
+        ax.text(row[0], row[1], row[2],'{0} {1}'.format(data_type, index), size=10)
+    plt.show()
+
+plot_data(U, "User")
+
+
+#Eighth Module: Three-dimensional plot for movies 
+plot_data(VT.T, "Movie", [-164.5, 51.25])
+
+
